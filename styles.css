@@ -2,11 +2,11 @@
    Consistent System Design: component styles (Pele, Obsidian 1.15+)
 
    Tag a node with its role and it gets that role's colour:
-     DB[(Postgres)]:::db
-     U([Users]):::client
+     DB[Postgres]:::db
+     U[Users]:::client
 
-   Classes
-     client    users, browsers, mobile apps   grey, pill-shaped
+   Built-in roles
+     client    users, browsers, mobile apps   grey
      cdn       CDN / edge                     cyan
      gateway   API gateway                    pink
      lb        load balancer                  purple
@@ -18,14 +18,22 @@
      storage   object / blob storage          yellow
      external  third-party service            grey, dashed border
 
-   Shapes come from the plugin (main.js): a tagged node with no
-   shape of its own gets its role's shape (db -> cylinder,
-   queue -> horizontal cylinder, storage -> bucket, cdn -> cloud,
-   lb -> hexagon, client -> pill).
+   Shapes and custom roles come from the plugin (main.js).
 
-   Three looks: Soft (default), Outline and Solid. Pick one in
-   Style Settings, or add the class sd-outline / sd-solid to
-   <body> yourself.
+   Customising
+     Settings → Consistent System Design   (always available)
+     Style Settings → Consistent System Design
+     or override these variables in your own CSS snippet:
+
+     --csd-<role>-color    e.g. --csd-db-color: teal;
+     --csd-<role>-dash     border dashes, e.g. "5 3" or none
+     --csd-fill-scale      tint strength, 1 = default
+     --csd-stroke-scale    border strength, 1 = default
+     --csd-radius          corner radius
+     --csd-border-width    border width
+
+   Where both are set, the plugin's own settings win over Style
+   Settings, and Style Settings wins over these defaults.
    ========================================================== */
 
 /* @settings
@@ -33,8 +41,8 @@ name: Consistent System Design
 id: consistent-system-design
 settings:
   - id: sd-style
-    title: Component style
-    description: How :::db, :::service and the other component classes look
+    title: Look
+    description: How the component classes look. The plugin's own Look setting, if set, wins.
     type: class-select
     allowEmpty: false
     default: sd-soft
@@ -45,76 +53,212 @@ settings:
         value: sd-outline
       - label: Solid (filled)
         value: sd-solid
+  - id: csd-fill-scale
+    title: Tint strength
+    description: How strongly fills are tinted. 1 is the default.
+    type: variable-number-slider
+    default: 1
+    min: 0
+    max: 3
+    step: 0.05
+  - id: csd-stroke-scale
+    title: Border strength
+    description: How strongly borders are coloured. 1 is the default.
+    type: variable-number-slider
+    default: 1
+    min: 0.25
+    max: 1.6
+    step: 0.05
+  - id: csd-radius
+    title: Corner radius
+    type: variable-number-slider
+    default: 8
+    min: 0
+    max: 24
+    step: 1
+    format: px
+  - id: csd-border-width
+    title: Border width
+    type: variable-number-slider
+    default: 1.5
+    min: 0.5
+    max: 4
+    step: 0.25
+    format: px
+  - id: csd-colors-heading
+    title: Role colours
+    description: Until you change a colour, your theme's colour is used. The swatches start from Obsidian's default palette.
+    type: heading
+    level: 2
+    collapsed: true
+  - id: csd-client-color
+    title: client
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#5c5c5c'
+    default-dark: '#b3b3b3'
+  - id: csd-cdn-color
+    title: cdn
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#00bfbc'
+    default-dark: '#53dfdd'
+  - id: csd-gateway-color
+    title: gateway
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#d53984'
+    default-dark: '#fa99cd'
+  - id: csd-lb-color
+    title: lb
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#7852ee'
+    default-dark: '#a882ff'
+  - id: csd-service-color
+    title: service
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#086ddd'
+    default-dark: '#027aff'
+  - id: csd-worker-color
+    title: worker
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#086ddd'
+    default-dark: '#027aff'
+  - id: csd-db-color
+    title: db
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#08b94e'
+    default-dark: '#44cf6e'
+  - id: csd-cache-color
+    title: cache
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#e93147'
+    default-dark: '#fb464c'
+  - id: csd-queue-color
+    title: queue
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#ec7500'
+    default-dark: '#e9973f'
+  - id: csd-storage-color
+    title: storage
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#e0ac00'
+    default-dark: '#e0de71'
+  - id: csd-external-color
+    title: external
+    type: variable-themed-color
+    format: hex
+    opacity: false
+    default-light: '#5c5c5c'
+    default-dark: '#b3b3b3'
 */
 
-/* ---------- role colours ---------- */
-.mermaid .pele .pele-node.client   { --sd: var(--text-muted); --_r: 999px; }
-.mermaid .pele .pele-node.cdn      { --sd: var(--color-cyan); }
-.mermaid .pele .pele-node.gateway  { --sd: var(--color-pink); }
-.mermaid .pele .pele-node.lb       { --sd: var(--color-purple); }
-.mermaid .pele .pele-node.service  { --sd: var(--color-blue); }
-.mermaid .pele .pele-node.worker   { --sd: var(--color-blue); }
-.mermaid .pele .pele-node.db       { --sd: var(--color-green); }
-.mermaid .pele .pele-node.cache    { --sd: var(--color-red); }
-.mermaid .pele .pele-node.queue    { --sd: var(--color-orange); }
-.mermaid .pele .pele-node.storage  { --sd: var(--color-yellow); }
-.mermaid .pele .pele-node.external { --sd: var(--text-muted); }
-
-/* ---------- Soft (default): tinted fill, coloured border ---------- */
+/* ---------- defaults ---------- */
 body {
-  --sd-fill: 14%;
-  --sd-stroke: 60%;
+  --csd-fill-scale: 1;
+  --csd-stroke-scale: 1;
+  --csd-radius: 8px;
+  --csd-border-width: 1.5px;
+  --csd-fill-base: 14%;
+  --csd-stroke-base: 60%;
 }
 body.theme-dark {
-  --sd-fill: 20%;
-  --sd-stroke: 70%;
+  --csd-fill-base: 20%;
+  --csd-stroke-base: 70%;
 }
-.mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
-  --_s: color-mix(in srgb, var(--sd) var(--sd-fill), var(--background-primary));
-  --_b: color-mix(in srgb, var(--sd) var(--sd-stroke), var(--background-primary));
-  --_r: 8px;
+
+/* ---------- roles ---------- */
+.mermaid .pele .pele-node.client   { --sd: var(--csd-client-color, var(--text-muted));    --sd-dash: var(--csd-client-dash, none); }
+.mermaid .pele .pele-node.cdn      { --sd: var(--csd-cdn-color, var(--color-cyan));       --sd-dash: var(--csd-cdn-dash, none); }
+.mermaid .pele .pele-node.gateway  { --sd: var(--csd-gateway-color, var(--color-pink));   --sd-dash: var(--csd-gateway-dash, none); }
+.mermaid .pele .pele-node.lb       { --sd: var(--csd-lb-color, var(--color-purple));      --sd-dash: var(--csd-lb-dash, none); }
+.mermaid .pele .pele-node.service  { --sd: var(--csd-service-color, var(--color-blue));   --sd-dash: var(--csd-service-dash, none); }
+.mermaid .pele .pele-node.worker   { --sd: var(--csd-worker-color, var(--color-blue));    --sd-dash: var(--csd-worker-dash, 5 3); }
+.mermaid .pele .pele-node.db       { --sd: var(--csd-db-color, var(--color-green));       --sd-dash: var(--csd-db-dash, none); }
+.mermaid .pele .pele-node.cache    { --sd: var(--csd-cache-color, var(--color-red));      --sd-dash: var(--csd-cache-dash, none); }
+.mermaid .pele .pele-node.queue    { --sd: var(--csd-queue-color, var(--color-orange));   --sd-dash: var(--csd-queue-dash, none); }
+.mermaid .pele .pele-node.storage  { --sd: var(--csd-storage-color, var(--color-yellow)); --sd-dash: var(--csd-storage-dash, none); }
+.mermaid .pele .pele-node.external { --sd: var(--csd-external-color, var(--text-muted));  --sd-dash: var(--csd-external-dash, 5 3); }
+/* Custom roles from the plugin's settings get the class "csd" plus
+   their own rule, generated by main.js. */
+
+/* ---------- Soft (default): tinted fill, coloured border ---------- */
+.mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
+  --_s: color-mix(in srgb, var(--sd) clamp(0%, calc(var(--csd-fill-base) * var(--csd-fill-scale)), 100%), var(--background-primary));
+  --_b: color-mix(in srgb, var(--sd) clamp(0%, calc(var(--csd-stroke-base) * var(--csd-stroke-scale)), 100%), var(--background-primary));
+  --_r: var(--csd-radius);
 }
 .mermaid .pele .pele-node.client { --_r: 999px; }
-.mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external)
+.mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external)
   > :is(rect, path, polygon, circle, ellipse) {
-  stroke-width: 1.5px;
+  stroke-width: var(--csd-border-width);
+  stroke-dasharray: var(--sd-dash, none);
 }
 
-/* async and third-party things get a dashed border */
-.mermaid .pele .pele-node:is(.worker, .external) > :is(rect, path, polygon, circle, ellipse) {
-  stroke-dasharray: 5 3;
-}
+/* ---------- Look: which one is active ----------
+   The plugin's Look setting adds csd-look-<name> to <body>; Style
+   Settings adds sd-<name>. The plugin's choice wins. */
 
 /* ---------- Outline: plain background, strong coloured border ---------- */
-body.sd-outline .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
+body:is(.csd-look-outline, .sd-outline:not(.csd-look-soft, .csd-look-solid))
+  .mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
   --_s: var(--background-primary);
   --_b: var(--sd);
 }
-body.sd-outline .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external)
+body:is(.csd-look-outline, .sd-outline:not(.csd-look-soft, .csd-look-solid))
+  .mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external)
   > :is(rect, path, polygon, circle, ellipse) {
-  stroke-width: 2px;
+  stroke-width: calc(var(--csd-border-width) + 0.5px);
 }
-body.sd-outline .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) .pele-label {
+body:is(.csd-look-outline, .sd-outline:not(.csd-look-soft, .csd-look-solid))
+  .mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) .pele-label {
   fill: color-mix(in srgb, var(--sd) 65%, var(--text-normal));
   font-weight: 600;
 }
 
 /* ---------- Solid: filled with the role colour ---------- */
-body.sd-solid .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
+body:is(.csd-look-solid, .sd-solid:not(.csd-look-soft, .csd-look-outline))
+  .mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
   --_s: var(--sd);
   --_b: color-mix(in srgb, var(--sd) 75%, black);
-  --sd-ink: #fff;
+  /* dark text on light colours, white text on dark ones */
+  --sd-ink: oklch(from var(--sd) clamp(0.22, (0.68 - l) * 1000, 1) 0 0);
 }
-/* light colours need dark text */
-body.sd-solid .mermaid .pele .pele-node:is(.cdn, .storage, .queue) { --sd-ink: #1e1e2e; }
-/* dark themes tend to use pastel colours, so dark text everywhere */
-body.theme-dark.sd-solid .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .db, .cache, .queue, .storage) { --sd-ink: #1e1e2e; }
-body.sd-solid .mermaid .pele .pele-node:is(.worker, .external) {
+/* dashed roles (async, third-party) stay light so they read as "not ours" */
+body:is(.csd-look-solid, .sd-solid:not(.csd-look-soft, .csd-look-outline))
+  .mermaid .pele .pele-node:is(.worker, .external, .csd-dashed) {
   --_s: color-mix(in srgb, var(--sd) 30%, var(--background-primary));
   --_b: var(--sd);
   --sd-ink: var(--text-normal);
 }
-body.sd-solid .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) .pele-label {
+body:is(.csd-look-solid, .sd-solid:not(.csd-look-soft, .csd-look-outline))
+  .mermaid .pele .pele-node:is(.csd, .client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) .pele-label {
   fill: var(--sd-ink);
   font-weight: 600;
+}
+
+/* ---------- settings page ---------- */
+.setting-item input.csd-role-name {
+  width: 10em;
+}
+.setting-item input.csd-invalid {
+  border-color: var(--text-error);
+  box-shadow: 0 0 0 1px var(--text-error);
 }

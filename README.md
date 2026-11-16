@@ -1,6 +1,6 @@
 # Consistent System Design
 
-Draw system design diagrams in Obsidian with consistent, theme-aware components. Tag a node with its role and it gets that role's colour and shape:
+Draw system design diagrams in Obsidian with consistent, theme-aware components. Tag a node with its role and it gets that role's colour and shape. Colours, shapes and borders are all adjustable, and you can add roles of your own:
 
 ````markdown
 ```mermaid
@@ -58,9 +58,42 @@ How it works: before Pele draws a flowchart, the plugin appends a line such as `
 
 Labels that contain brackets need quotes, as they always do in Mermaid syntax: `PG["Postgres (main)"]:::db`.
 
-## Looks
+## Customising
 
-Three looks are included: **Soft** (tinted fill, the default), **Outline** (coloured border and text) and **Solid** (filled with the role colour). With the [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) plugin, choose one under **Style Settings → Consistent System Design**. Without it, components use Soft.
+### Settings page
+
+**Settings → Consistent System Design** has everything, with no other plugin needed:
+
+- **Look:** Soft (tinted fill, the default), Outline (coloured border and text) or Solid (filled with the role colour; text turns dark or light to suit each colour).
+- **Sliders:** tint strength, border strength, corner radius and border width.
+- **Roles:** for each built-in role, a colour, a shape and a dashed-border toggle. Reset a colour to follow your theme again.
+- **Custom roles:** add your own classes, such as `search`, `auth` or `ml-model`, each with a colour, shape and border. Use them like the built-in ones: `Index[Search]:::search`.
+- **Reset styling** puts the look, sliders and built-in roles back to their defaults and keeps your custom roles.
+
+Colour changes apply straight away. Shape changes show the next time a note is opened. Settings are saved per vault.
+
+### Style Settings
+
+With the [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) plugin, **Style Settings → Consistent System Design** offers the look, the four sliders and a colour per built-in role, each with separate light and dark values. If the same thing is set in both places, the plugin's own settings page wins.
+
+### CSS snippet
+
+Every value is a CSS variable you can override in your own snippet:
+
+```css
+body {
+  --csd-db-color: teal;        /* any role: --csd-<role>-color */
+  --csd-worker-dash: none;     /* any role: --csd-<role>-dash, e.g. "5 3" */
+  --csd-fill-scale: 1.5;       /* tint strength, 1 = default */
+  --csd-stroke-scale: 1;       /* border strength, 1 = default */
+  --csd-radius: 4px;
+  --csd-border-width: 2px;
+}
+```
+
+Custom roles have the same variables: `--csd-search-color`, `--csd-search-dash`.
+
+Order of precedence: the plugin's settings page, then Style Settings, then your snippet, then the defaults.
 
 ## Keep diagram direction
 
