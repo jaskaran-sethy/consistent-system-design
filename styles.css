@@ -18,13 +18,10 @@
      storage   object / blob storage          yellow
      external  third-party service            grey, dashed border
 
-   CSS can colour a node and round its corners, but it can't
-   change the shape. Use the matching shape syntax for the
-   classic look:
-     cylinder  DB[(Postgres)]     db, cache, storage
-     stadium   U([Users])         client (plain [ ] also becomes a pill)
-     hexagon   LB{{Load balancer}} lb
-     bars      Q[[order-events]]   queue
+   Shapes come from the plugin (main.js): a tagged node with no
+   shape of its own gets its role's shape (db -> cylinder,
+   queue -> horizontal cylinder, storage -> bucket, cdn -> cloud,
+   lb -> hexagon, client -> pill).
 
    Three looks: Soft (default), Outline and Solid. Pick one in
    Style Settings, or add the class sd-outline / sd-solid to

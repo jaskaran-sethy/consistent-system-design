@@ -1,16 +1,16 @@
 # Consistent System Design
 
-Draw system design diagrams in Obsidian with consistent, theme-aware components. Tag a node with its role and it gets that role's colour:
+Draw system design diagrams in Obsidian with consistent, theme-aware components. Tag a node with its role and it gets that role's colour and shape:
 
 ````markdown
 ```mermaid
 flowchart LR
-U([Users]):::client --> CDN[CDN]:::cdn --> GW[API gateway]:::gateway --> LB{{Load balancer}}:::lb
+U[Users]:::client --> CDN[CDN]:::cdn --> GW[API gateway]:::gateway --> LB[Load balancer]:::lb
 LB --> API[Orders service]:::service
-API --> R[(Redis)]:::cache
-API --> PG[(Postgres)]:::db
-API --> S3[(S3 images)]:::storage
-API --> Q[[order-events]]:::queue --> W[Email worker]:::worker --> SG[SendGrid]:::external
+API --> R[Redis]:::cache
+API --> PG[Postgres]:::db
+API --> S3[S3 images]:::storage
+API --> Q[order-events]:::queue --> W[Email worker]:::worker --> SG[SendGrid]:::external
 ```
 ````
 
@@ -20,29 +20,43 @@ Requires Obsidian 1.15 or later, which draws diagrams with [Pele](https://github
 
 ## Components
 
-| Class | For | Look | Shape to pair it with |
+| Class | For | Look | Automatic shape |
 |---|---|---|---|
-| `client` | users, browsers, mobile apps | grey | pill (automatic) or `([ ])` |
-| `cdn` | CDN, edge | cyan | `[ ]` |
-| `gateway` | API gateway | pink | `[ ]` |
-| `lb` | load balancer | purple | `{{ }}` |
-| `service` | app or API service | blue | `[ ]` |
-| `worker` | async worker, background job | blue, dashed border | `[ ]` |
-| `db` | database | green | `[( )]` |
-| `cache` | Redis, Memcached | red | `[( )]` |
-| `queue` | queue or stream (Kafka, SQS) | orange | `[[ ]]` |
-| `storage` | object or blob storage | yellow | `[( )]` |
-| `external` | third-party service | grey, dashed border | `[ ]` |
+| `client` | users, browsers, mobile apps | grey | pill |
+| `cdn` | CDN, edge | cyan | cloud |
+| `gateway` | API gateway | pink | box |
+| `lb` | load balancer | purple | hexagon |
+| `service` | app or API service | blue | box |
+| `worker` | async worker, background job | blue, dashed border | box |
+| `db` | database | green | cylinder |
+| `cache` | Redis, Memcached | red | cylinder |
+| `queue` | queue or stream (Kafka, SQS) | orange | horizontal cylinder |
+| `storage` | object or blob storage | yellow | bucket |
+| `external` | third-party service | grey, dashed border | box |
 
 Colours come from your theme's `--color-*` variables, so they follow light and dark mode and theme changes.
-
-The class sets colour, border and corner radius. It can't change a node's shape, so write `[(Postgres)]` if you want a cylinder. The exception is `client`: a plain box becomes a pill.
 
 You can also tag nodes with a `class` statement:
 
 ```
 class PG,Orders db
 ```
+
+## Automatic shapes
+
+A tagged node gets its role's shape only when you haven't given it one: `PG[Postgres]:::db` and `PG:::db` become cylinders. A shape you write yourself always wins, so `PG{{Postgres}}:::db` stays a hexagon.
+
+To skip one diagram, add this line to it:
+
+```
+%% csd: no-shapes
+```
+
+To turn the feature off everywhere, use **Settings → Consistent System Design → Automatic shapes**.
+
+How it works: before Pele draws a flowchart, the plugin appends a line such as `PG@{ shape: cyl }` for each tagged node without a shape. Your note is never changed.
+
+Labels that contain brackets need quotes, as they always do in Mermaid syntax: `PG["Postgres (main)"]:::db`.
 
 ## Looks
 
