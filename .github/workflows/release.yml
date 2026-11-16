@@ -2,23 +2,40 @@ name: Release
 
 # Push a tag that matches manifest.json's version (for example 1.0.0) to
 # publish a GitHub release with the three files Obsidian installs.
+#
+# Each release file gets a build provenance attestation, so anyone can check
+# it was built from this repository:
+#   gh attestation verify main.js -R jaskaran-sethy/consistent-system-design
+#
+# To attest an existing release without publishing a new one, run this
+# workflow by hand (Actions -> Release -> Run workflow) with that tag.
 on:
   push:
     tags:
       - "[0-9]*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to attest (no new release is created)
+        required: true
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.TAG }}
 
       - name: Check the tag matches manifest.json
-        env:
-          TAG: ${{ github.ref_name }}
         run: |
           version=$(node -p 'require("./manifest.json").version')
           if [ "$TAG" != "$version" ]; then
@@ -29,8 +46,27 @@ jobs:
       - name: Check main.js parses
         run: node --check main.js
 
+      - name: Attest release files
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
+
       - name: Create the release
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: gh release create "$TAG" main.js manifest.json styles.css --title "$TAG" --generate-notes
+
+      - name: Check the release files match what was attested
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir released
+          gh release download "$TAG" -D released
+          for f in main.js manifest.json styles.css; do
+            cmp "$f" "released/$f" || { echo "$f in release $TAG differs from the tag's source"; exit 1; }
+          done
