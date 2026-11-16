@@ -1,7 +1,7 @@
 {
   "id": "consistent-system-design",
   "name": "Consistent System Design",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.15.0",
   "description": "Style diagram nodes as databases, caches, queues and services with one class, and keep wide left-to-right diagrams from flipping top-down.",
   "author": "jaskaran-sethy",

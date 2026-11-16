@@ -262,3 +262,9 @@ body:is(.csd-look-solid, .sd-solid:not(.csd-look-soft, .csd-look-outline))
   border-color: var(--text-error);
   box-shadow: 0 0 0 1px var(--text-error);
 }
+.setting-item .csd-toggle-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  user-select: none;
+}

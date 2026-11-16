@@ -422,12 +422,7 @@ class ConsistentSystemDesignSettingTab extends PluginSettingTab {
         b.setIcon("rotate-ccw").setTooltip("Use the theme's colour").onClick(async () => update({ color: null }, true))
       );
       this.shapeDropdown(setting, o.shape || role.shape, (v) => update({ shape: v === role.shape ? null : v }));
-      setting.addToggle((t) =>
-        t
-          .setTooltip("Dashed border")
-          .setValue(o.dashed ?? role.dashed)
-          .onChange(async (v) => update({ dashed: v === role.dashed ? null : v }))
-      );
+      this.dashedToggle(setting, o.dashed ?? role.dashed, (v) => update({ dashed: v === role.dashed ? null : v }));
     }
 
     // ---- custom roles ----
@@ -455,9 +450,7 @@ class ConsistentSystemDesignSettingTab extends PluginSettingTab {
         c.setValue(role.color || "#888888").onChange(async (v) => { role.color = v; await save(); })
       );
       this.shapeDropdown(setting, role.shape || "rect", async (v) => { role.shape = v; await save(); });
-      setting.addToggle((t) =>
-        t.setTooltip("Dashed border").setValue(!!role.dashed).onChange(async (v) => { role.dashed = v; await save(); })
-      );
+      this.dashedToggle(setting, !!role.dashed, async (v) => { role.dashed = v; await save(); });
       setting.addExtraButton((b) =>
         b.setIcon("trash").setTooltip("Remove role").onClick(async () => {
           s.customRoles.splice(index, 1);
@@ -486,6 +479,17 @@ class ConsistentSystemDesignSettingTab extends PluginSettingTab {
           new Notice("Consistent System Design: styling reset.");
         })
       );
+  }
+
+  // A toggle with a visible "Dashed" label; clicking the label flips it too.
+  dashedToggle(setting, value, onChange) {
+    const label = setting.controlEl.createSpan({ cls: "csd-toggle-label", text: "Dashed" });
+    setting.addToggle((t) => {
+      t.setTooltip("Dashed border").setValue(value).onChange(onChange);
+      t.toggleEl.setAttribute("aria-label", "Dashed border");
+      // click the toggle itself, so Obsidian runs its normal change handling
+      label.addEventListener("click", () => t.toggleEl.click());
+    });
   }
 
   shapeDropdown(setting, value, onChange) {
