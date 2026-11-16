@@ -76,6 +76,8 @@ Labels that contain brackets need quotes, as they always do in Mermaid syntax: `
 
 **Settings → Consistent System Design** has everything, with no other plugin needed:
 
+<img alt="The plugin's settings page in Obsidian: sliders for tint strength, border strength, corner radius and border width, then a row per role with a colour swatch, a reset button, a shape dropdown and a dashed-border toggle." src="docs/images/settings.png" width="720">
+
 - **Look:** Soft (tinted fill, the default), Outline (coloured border and text) or Solid (filled with the role colour; text turns dark or light to suit each colour).
 - **Sliders:** tint strength, border strength, corner radius and border width.
 - **Roles:** for each built-in role, a colour, a shape and a dashed-border toggle. Reset a colour to follow your theme again.
