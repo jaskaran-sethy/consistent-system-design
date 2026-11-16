@@ -1,0 +1,123 @@
+/* ==========================================================
+   Consistent System Design: component styles (Pele, Obsidian 1.15+)
+
+   Tag a node with its role and it gets that role's colour:
+     DB[(Postgres)]:::db
+     U([Users]):::client
+
+   Classes
+     client    users, browsers, mobile apps   grey, pill-shaped
+     cdn       CDN / edge                     cyan
+     gateway   API gateway                    pink
+     lb        load balancer                  purple
+     service   app / API service              blue
+     worker    async worker / job             blue, dashed border
+     db        database                       green
+     cache     cache (Redis, Memcached)       red
+     queue     queue / stream (Kafka, SQS)    orange
+     storage   object / blob storage          yellow
+     external  third-party service            grey, dashed border
+
+   CSS can colour a node and round its corners, but it can't
+   change the shape. Use the matching shape syntax for the
+   classic look:
+     cylinder  DB[(Postgres)]     db, cache, storage
+     stadium   U([Users])         client (plain [ ] also becomes a pill)
+     hexagon   LB{{Load balancer}} lb
+     bars      Q[[order-events]]   queue
+
+   Three looks: Soft (default), Outline and Solid. Pick one in
+   Style Settings, or add the class sd-outline / sd-solid to
+   <body> yourself.
+   ========================================================== */
+
+/* @settings
+name: Consistent System Design
+id: consistent-system-design
+settings:
+  - id: sd-style
+    title: Component style
+    description: How :::db, :::service and the other component classes look
+    type: class-select
+    allowEmpty: false
+    default: sd-soft
+    options:
+      - label: Soft (tinted fill)
+        value: sd-soft
+      - label: Outline (coloured border)
+        value: sd-outline
+      - label: Solid (filled)
+        value: sd-solid
+*/
+
+/* ---------- role colours ---------- */
+.mermaid .pele .pele-node.client   { --sd: var(--text-muted); --_r: 999px; }
+.mermaid .pele .pele-node.cdn      { --sd: var(--color-cyan); }
+.mermaid .pele .pele-node.gateway  { --sd: var(--color-pink); }
+.mermaid .pele .pele-node.lb       { --sd: var(--color-purple); }
+.mermaid .pele .pele-node.service  { --sd: var(--color-blue); }
+.mermaid .pele .pele-node.worker   { --sd: var(--color-blue); }
+.mermaid .pele .pele-node.db       { --sd: var(--color-green); }
+.mermaid .pele .pele-node.cache    { --sd: var(--color-red); }
+.mermaid .pele .pele-node.queue    { --sd: var(--color-orange); }
+.mermaid .pele .pele-node.storage  { --sd: var(--color-yellow); }
+.mermaid .pele .pele-node.external { --sd: var(--text-muted); }
+
+/* ---------- Soft (default): tinted fill, coloured border ---------- */
+body {
+  --sd-fill: 14%;
+  --sd-stroke: 60%;
+}
+body.theme-dark {
+  --sd-fill: 20%;
+  --sd-stroke: 70%;
+}
+.mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
+  --_s: color-mix(in srgb, var(--sd) var(--sd-fill), var(--background-primary));
+  --_b: color-mix(in srgb, var(--sd) var(--sd-stroke), var(--background-primary));
+  --_r: 8px;
+}
+.mermaid .pele .pele-node.client { --_r: 999px; }
+.mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external)
+  > :is(rect, path, polygon, circle, ellipse) {
+  stroke-width: 1.5px;
+}
+
+/* async and third-party things get a dashed border */
+.mermaid .pele .pele-node:is(.worker, .external) > :is(rect, path, polygon, circle, ellipse) {
+  stroke-dasharray: 5 3;
+}
+
+/* ---------- Outline: plain background, strong coloured border ---------- */
+body.sd-outline .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
+  --_s: var(--background-primary);
+  --_b: var(--sd);
+}
+body.sd-outline .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external)
+  > :is(rect, path, polygon, circle, ellipse) {
+  stroke-width: 2px;
+}
+body.sd-outline .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) .pele-label {
+  fill: color-mix(in srgb, var(--sd) 65%, var(--text-normal));
+  font-weight: 600;
+}
+
+/* ---------- Solid: filled with the role colour ---------- */
+body.sd-solid .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) {
+  --_s: var(--sd);
+  --_b: color-mix(in srgb, var(--sd) 75%, black);
+  --sd-ink: #fff;
+}
+/* light colours need dark text */
+body.sd-solid .mermaid .pele .pele-node:is(.cdn, .storage, .queue) { --sd-ink: #1e1e2e; }
+/* dark themes tend to use pastel colours, so dark text everywhere */
+body.theme-dark.sd-solid .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .db, .cache, .queue, .storage) { --sd-ink: #1e1e2e; }
+body.sd-solid .mermaid .pele .pele-node:is(.worker, .external) {
+  --_s: color-mix(in srgb, var(--sd) 30%, var(--background-primary));
+  --_b: var(--sd);
+  --sd-ink: var(--text-normal);
+}
+body.sd-solid .mermaid .pele .pele-node:is(.client, .cdn, .gateway, .lb, .service, .worker, .db, .cache, .queue, .storage, .external) .pele-label {
+  fill: var(--sd-ink);
+  font-weight: 600;
+}
